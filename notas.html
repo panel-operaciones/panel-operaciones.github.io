@@ -65,8 +65,9 @@
             border: 1px solid #ddd;
             border-radius: 4px;
             display: flex;
+            flex-direction: column;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
         }
         .note button {
             background-color: #f44336;
@@ -75,10 +76,15 @@
             border-radius: 4px;
             cursor: pointer;
             padding: 5px 10px;
-
+            align-self: flex-end;
         }
         .note button:hover {
             background-color: #e60000;
+        }
+        .note-time {
+            font-size: 0.8em;
+            color: #777;
+            margin-bottom: 5px;
         }
     </style>
 </head>
@@ -111,15 +117,17 @@ d="M437.906,64.13c1.549,0,2.816-0.853,2.943-1.903c0.014-0.222,0.018-0.389,0.018-
         function loadNotes() {
             const notes = JSON.parse(localStorage.getItem("notes")) || [];
             notes.forEach(note => {
-                createNoteElement(note);
+                createNoteElement(note.text, note.date);
             });
         }
 
         // Guardar una nota en localStorage
         function saveNotes() {
             const notes = [];
-            document.querySelectorAll(".note span").forEach(note => {
-                notes.push(note.textContent);
+            document.querySelectorAll(".note").forEach(note => {
+                const noteText = note.querySelector("span.note-content").textContent;
+                const noteDate = note.querySelector("span.note-time").textContent;
+                notes.push({ text: noteText, date: noteDate });
             });
             localStorage.setItem("notes", JSON.stringify(notes));
         }
@@ -134,19 +142,25 @@ d="M437.906,64.13c1.549,0,2.816-0.853,2.943-1.903c0.014-0.222,0.018-0.389,0.018-
                 return;
             }
 
-            createNoteElement(noteText);
+            const date = new Date().toLocaleString();
+            createNoteElement(noteText, date);
             saveNotes();
             noteInput.value = "";
         }
 
         // Crear el elemento de la nota y agregarlo a la lista
-        function createNoteElement(noteText) {
+        function createNoteElement(noteText, noteDate) {
             const notesList = document.getElementById("notesList");
 
             const noteElement = document.createElement("div");
             noteElement.className = "note";
 
+            const noteTime = document.createElement("span");
+            noteTime.className = "note-time";
+            noteTime.textContent = noteDate;
+
             const noteContent = document.createElement("span");
+            noteContent.className = "note-content";
             noteContent.textContent = noteText;
 
             const deleteButton = document.createElement("button");
@@ -156,6 +170,7 @@ d="M437.906,64.13c1.549,0,2.816-0.853,2.943-1.903c0.014-0.222,0.018-0.389,0.018-
                 saveNotes();
             };
 
+            noteElement.appendChild(noteTime);
             noteElement.appendChild(noteContent);
             noteElement.appendChild(deleteButton);
             notesList.appendChild(noteElement);
